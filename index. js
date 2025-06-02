@@ -1,0 +1,31 @@
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
+
+// إعداد واتساب
+const client = new Client({
+  authStrategy: new LocalAuth(),
+  puppeteer: {
+    headless: true,
+    args: ['--no-sandbox']
+  }
+});
+
+// عند ظهور كود QR
+client.on('qr', (qr) => {
+  qrcode.generate(qr, { small: true });
+  console.log('👀 امسح الكود من واتساب لربط البوت.');
+});
+
+// عند الاتصال الناجح
+client.on('ready', () => {
+  console.log('✅ البوت متصل بواتساب ويعمل.');
+});
+
+// عند رصد حالة جديدة
+client.on('message_revoke_everyone', async (after, before) => {
+  const contact = await before.getContact();
+  const name = contact.pushname || contact.number;
+  console.log(`📸 تم نشر حالة جديدة من: ${name}`);
+});
+
+client.initialize();
